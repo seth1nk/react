@@ -26,64 +26,64 @@ const Login = ({
   const vkidContainerRef = useRef(null);
 
   useEffect(() => {
-    console.log('Login.js: VKID SDK imported:', VKID);
-    try {
-      VKID.Config.init({
-        app: CLIENT_ID,
-        redirectUrl: REDIRECT_URI,
-        state: 'state123',
-        scope: 'email',
-      });
-      console.log('Login.js: VKID initialized successfully');
-    } catch (err) {
-      console.error('Login.js: Ошибка инициализации VKID:', err);
-      setError('Ошибка инициализации VKID');
-    }
-
-    if (vkidContainerRef.current) {
-      const oneTap = new VKID.OneTap();
-      oneTap
-        .render({
-          container: vkidContainerRef.current,
-          scheme: 'light',
-          lang: 'rus',
-          showAlternativeLogin: true,
-        })
-        .on(VKID.WidgetEvents.ERROR, (error) => {
-          console.error('Login.js: Ошибка VKID:', error);
-          setError('Ошибка при авторизации через VKID');
-        })
-        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
-          const { code, device_id } = payload;
-          try {
-            const response = await VKID.Auth.exchangeCode(code, device_id);
-            console.log('Login.js: Успешный обмен кода:', response);
-            const { access_token, user_id, email } = response;
-
-            // Отправка access_token на сервер для проверки и сохранения
-            const serverResponse = await fetch(`${BACKEND_URL}/auth/vkid/token`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ access_token, user_id, email }),
-              credentials: 'include',
-            });
-
-            if (!serverResponse.ok) throw new Error(`Ошибка сервера: ${serverResponse.status}`);
-            const userInfo = await serverResponse.json();
-            onLoginSuccess(userInfo);
-            localStorage.setItem('vk_access_token', access_token);
-            localStorage.setItem('userInfo', JSON.stringify(userInfo));
-            onLoginClose();
-          } catch (error) {
-            console.error('Login.js: Ошибка обмена кода или обработки:', error);
-            setError('Ошибка авторизации через VKID');
-          }
+    if (showLogin && vkidContainerRef.current) {
+      console.log('Login.js: VKID SDK imported:', VKID);
+      try {
+        VKID.Config.init({
+          app: CLIENT_ID,
+          redirectUrl: REDIRECT_URI,
+          state: 'state123',
+          scope: 'email',
         });
-    } else {
+        console.log('Login.js: VKID initialized successfully');
+
+        const oneTap = new VKID.OneTap();
+        oneTap
+          .render({
+            container: vkidContainerRef.current,
+            scheme: 'light',
+            lang: 'rus',
+            showAlternativeLogin: true,
+          })
+          .on(VKID.WidgetEvents.ERROR, (error) => {
+            console.error('Login.js: Ошибка VKID:', error);
+            setError('Ошибка при авторизации через VKID');
+          })
+          .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
+            const { code, device_id } = payload;
+            try {
+              const response = await VKID.Auth.exchangeCode(code, device_id);
+              console.log('Login.js: Успешный обмен кода:', response);
+              const { access_token, user_id, email } = response;
+
+              // Отправка access_token на сервер
+              const serverResponse = await fetch(`${BACKEND_URL}/auth/vkid/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token, user_id, email }),
+                credentials: 'include',
+              });
+
+              if (!serverResponse.ok) throw new Error(`Ошибка сервера: ${serverResponse.status}`);
+              const userInfo = await serverResponse.json();
+              onLoginSuccess(userInfo);
+              localStorage.setItem('vk_access_token', access_token);
+              localStorage.setItem('userInfo', JSON.stringify(userInfo));
+              onLoginClose();
+            } catch (error) {
+              console.error('Login.js: Ошибка обмена кода или обработки:', error);
+              setError('Ошибка авторизации через VKID');
+            }
+          });
+      } catch (err) {
+        console.error('Login.js: Ошибка инициализации VKID:', err);
+        setError('Ошибка инициализации VKID');
+      }
+    } else if (!vkidContainerRef.current) {
       console.error('Login.js: Контейнер для VKID не найден');
       setError('Ошибка: Контейнер для VKID не инициализирован');
     }
-  }, [onLoginSuccess, onLoginClose, BACKEND_URL]);
+  }, [showLogin, onLoginSuccess, onLoginClose, BACKEND_URL]);
 
   useEffect(() => {
     const googleToken = localStorage.getItem('google_access_token');
@@ -205,7 +205,7 @@ const Login = ({
   });
 
   const handleVKIDLogin = () => {
-    if (vkidContainerRef.current) {
+    if (showLogin && vkidContainerRef.current) {
       const oneTap = new VKID.OneTap();
       oneTap.render({
         container: vkidContainerRef.current,
