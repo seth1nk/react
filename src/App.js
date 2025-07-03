@@ -34,6 +34,8 @@ function App() {
     const state = urlParams.get('state');
 
     if (code && state === 'state123') {
+      // Очистка URL сразу, чтобы избежать повторных запросов
+      window.history.replaceState({}, document.title, window.location.pathname);
       console.log('App.js: Обнаружен code из VKID:', code);
       fetch(`${BACKEND_URL}/auth/vkid?code=${code}&state=${state}`, {
         method: 'GET',
@@ -45,6 +47,9 @@ function App() {
         })
         .then((response) => {
           console.log('App.js: Ответ от /auth/vkid:', response);
+          if (response.error) {
+            throw new Error(`Ошибка VK API: ${response.error} - ${response.details}`);
+          }
           const { access_token } = response;
           if (!access_token) throw new Error('access_token не получен');
           localStorage.setItem('vk_access_token', access_token);
@@ -66,7 +71,6 @@ function App() {
             };
             handleLoginSuccess(userInfo);
             localStorage.setItem('userInfo', JSON.stringify(userInfo));
-            window.history.replaceState({}, document.title, window.location.pathname);
           } else {
             throw new Error('Данные пользователя не получены');
           }
