@@ -18,7 +18,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   // Загрузка VKID SDK
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://unpkg.com/@vkid/sdk@2.5.2/dist-sdk/umd/index.js";
+    script.src = "https://unpkg.com/@vkid/sdk@2.6.0/dist-sdk/umd/index.js";
     script.async = true;
     script.onload = () => {
       console.log('VKID SDK script loaded');
