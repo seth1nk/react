@@ -11,6 +11,11 @@ const NavBar = ({ onLoginShow, onRegisterShow, isAuthenticated, user, onLogout }
   const [scrolled, setScrolled] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
+  // Отладка пропсов
+  useEffect(() => {
+    console.log('NavBar props:', { isAuthenticated, user });
+  }, [isAuthenticated, user]);
+
   // Обработка скролла
   useEffect(() => {
     const onScroll = () => {
@@ -42,9 +47,9 @@ const NavBar = ({ onLoginShow, onRegisterShow, isAuthenticated, user, onLogout }
     <Router>
       <Navbar expand="md" className={scrolled ? "scrolled" : ""}>
         <Container>
-<Navbar.Brand href="/">
-  <img src={logo} alt="Logo" style={{ width: '150px', height: 'auto' }} />
-</Navbar.Brand>
+          <Navbar.Brand href="/">
+            <img src={logo} alt="Logo" style={{ width: '150px', height: 'auto' }} />
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav">
             <span className="navbar-toggler-icon"></span>
           </Navbar.Toggle>
