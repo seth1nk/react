@@ -22,7 +22,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
     script.async = true;
     script.onload = () => {
       console.log('VKID SDK script loaded');
-      // Проверяем window.VKID с небольшой задержкой
+      // Проверяем window.VKID с задержкой
       const checkVKID = () => {
         if (window.VKID) {
           console.log('VKID available, initializing...', window.VKID);
@@ -33,21 +33,25 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
               state: 'state123',
               scope: 'email',
             });
-            console.log('VKID initialized successfully');
+            console.log('VKID initialized successfully', window.VKID);
           } catch (err) {
             console.error('Ошибка инициализации VKID:', err);
             setError('Ошибка инициализации VKID');
           }
         } else {
-          console.error('VKID not found, window object:', Object.keys(window));
+          console.error('VKID not found, window keys:', Object.keys(window));
           setError('Не удалось загрузить VKID SDK');
+          // Проверяем наличие других объектов, например, VKIDSDK
+          if (window.VKIDSDK) {
+            console.log('Found VKIDSDK instead of VKID:', window.VKIDSDK);
+          }
         }
       };
-      // Задержка для асинхронной загрузки
-      setTimeout(checkVKID, 100);
+      // Задержка увеличена до 500 мс
+      setTimeout(checkVKID, 500);
     };
-    script.onerror = () => {
-      console.error('Failed to load VKID SDK script');
+    script.onerror = (err) => {
+      console.error('Failed to load VKID SDK script:', err);
       setError('Ошибка загрузки VKID SDK');
     };
     document.body.appendChild(script);
