@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import * as VKID from '@vkid/sdk';
-import vkidIcon from '../assets/img/nav-icon1.svg';
 
 // Константы
 const APP_NAME = "VKAPITEST";
 const CLIENT_ID = "53544787";
 const REDIRECT_URI = "https://react-lime-delta.vercel.app";
 const BACKEND_URL = "https://reactz-czkx.onrender.com";
-const VK_AUTH_URL = `https://id.vk.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=email&v=5.131`;
+const VK_AUTH_URL = `https://id.vk.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=email,profile&v=5.131`;
 
 const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
   const [email, setEmail] = useState('');
@@ -25,7 +24,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
         app: CLIENT_ID,
         redirectUrl: REDIRECT_URI,
         state: 'state123',
-        scope: 'email',
+        scope: 'email,profile',
       });
       console.log('VKID initialized successfully');
     } catch (err) {
@@ -33,6 +32,14 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       setError('Ошибка инициализации VKID');
     }
   }, []);
+
+  // Автоматический редирект на VK авторизацию при открытии модального окна логина
+  useEffect(() => {
+    if (showLogin) {
+      console.log('Login.js: showLogin is true, redirecting to VK auth:', VK_AUTH_URL);
+      window.location.href = VK_AUTH_URL;
+    }
+  }, [showLogin]);
 
   // Проверка токена при загрузке
   useEffect(() => {
@@ -42,11 +49,11 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
 
     // Проверка URL для токена VKID
     const hash = window.location.hash;
-    console.log('URL hash:', hash); // Отладка
+    console.log('Login.js: URL hash:', hash);
     if (hash.includes('access_token')) {
       const params = new URLSearchParams(hash.replace('#', ''));
       const accessToken = params.get('access_token');
-      console.log('VK access_token:', accessToken); // Отладка
+      console.log('Login.js: VK access_token:', accessToken);
       if (accessToken) {
         localStorage.setItem('vk_access_token', accessToken);
         fetch(`https://api.vk.com/method/users.get?access_token=${accessToken}&v=5.131&fields=first_name,last_name,photo_100`)
@@ -55,7 +62,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
             return res.json();
           })
           .then((data) => {
-            console.log('VK API response:', data); // Отладка
+            console.log('Login.js: VK API response:', data);
             if (data.response && data.response.length > 0) {
               const vkUser = data.response[0];
               const userInfo = {
@@ -63,7 +70,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
                 picture: vkUser.photo_100,
                 email: vkUser.email || '',
               };
-              console.log('Calling onLoginSuccess with:', userInfo); // Отладка
+              console.log('Login.js: Calling onLoginSuccess with:', userInfo);
               onLoginSuccess(userInfo);
               localStorage.setItem('userInfo', JSON.stringify(userInfo));
               window.location.hash = '';
@@ -72,7 +79,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
             }
           })
           .catch((error) => {
-            console.error('Ошибка получения данных VK:', error.message);
+            console.error('Login.js: Ошибка получения данных VK:', error.message);
             setError('Ошибка получения данных пользователя');
             localStorage.removeItem('vk_access_token');
             onLogout();
@@ -81,7 +88,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
     }
 
     if (storedUser && (googleToken || vkToken)) {
-      console.log('Restoring user from localStorage:', storedUser); // Отладка
+      console.log('Login.js: Restoring user from localStorage:', storedUser);
       onLoginSuccess(storedUser);
       return;
     }
@@ -99,7 +106,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
         })
         .then((userInfo) => {
           if (userInfo.email) {
-            console.log('Google login success:', userInfo); // Отладка
+            console.log('Login.js: Google login success:', userInfo);
             onLoginSuccess(userInfo);
             localStorage.setItem('userInfo', JSON.stringify(userInfo));
           } else {
@@ -109,7 +116,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
           }
         })
         .catch((err) => {
-          console.error('Ошибка проверки Google токена:', err.message);
+          console.error('Login.js: Ошибка проверки Google токена:', err.message);
           setError('Ошибка проверки Google токена');
         });
     } else if (vkToken) {
@@ -119,7 +126,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
           return res.json();
         })
         .then((data) => {
-          console.log('VK token check response:', data); // Отладка
+          console.log('Login.js: VK token check response:', data);
           if (data.response && data.response.length > 0) {
             const vkUser = data.response[0];
             const userInfo = {
@@ -127,7 +134,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
               picture: vkUser.photo_100,
               email: vkUser.email || '',
             };
-            console.log('Calling onLoginSuccess with:', userInfo); // Отладка
+            console.log('Login.js: Calling onLoginSuccess with:', userInfo);
             onLoginSuccess(userInfo);
             localStorage.setItem('userInfo', JSON.stringify(userInfo));
           } else {
@@ -137,7 +144,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
           }
         })
         .catch((err) => {
-          console.error('Ошибка проверки VKID токена:', err.message);
+          console.error('Login.js: Ошибка проверки VKID токена:', err.message);
           setError('Ошибка проверки VKID токена');
         });
     }
@@ -153,7 +160,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       const response = await axios.post(`${BACKEND_URL}/login`, { email, password }, { withCredentials: true });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name: response.data.name || email };
-      console.log('Manual login success:', userInfo); // Отладка
+      console.log('Login.js: Manual login success:', userInfo);
       onLoginSuccess(userInfo);
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       setError('');
@@ -161,7 +168,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       setPassword('');
       onLoginClose();
     } catch (error) {
-      console.error('Ошибка входа:', error.message);
+      console.error('Login.js: Ошибка входа:', error.message);
       setError(error.response?.data?.error || 'Ошибка входа');
     }
   };
@@ -176,7 +183,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       const response = await axios.post(`${BACKEND_URL}/register`, { email, password, name }, { withCredentials: true });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name };
-      console.log('Register success:', userInfo); // Отладка
+      console.log('Login.js: Register success:', userInfo);
       onRegisterSuccess(userInfo);
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       setError('');
@@ -185,7 +192,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       setName('');
       onRegisterClose();
     } catch (error) {
-      console.error('Ошибка регистрации:', error.message);
+      console.error('Login.js: Ошибка регистрации:', error.message);
       setError(error.response?.data?.error || 'Ошибка регистрации');
     }
   };
@@ -202,38 +209,24 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
         if (!res.ok) throw new Error(`Ошибка Google: ${res.status}`);
         const userInfo = await res.json();
         if (userInfo.email) {
-          console.log('Google login success:', userInfo); // Отладка
+          console.log('Login.js: Google login success:', userInfo);
           onLoginSuccess(userInfo);
           localStorage.setItem('google_access_token', tokenResponse.access_token);
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
           onLoginClose();
         }
       } catch (error) {
-        console.error('Ошибка входа через Google:', error.message);
+        console.error('Login.js: Ошибка входа через Google:', error.message);
         setError('Ошибка входа через Google');
       }
     },
     onError: (error) => {
-      console.error('Ошибка авторизации через Google:', error);
+      console.error('Login.js: Ошибка авторизации через Google:', error);
       setError('Ошибка авторизации через Google');
     },
     scope: 'email profile',
     redirect_uri: REDIRECT_URI,
   });
-
-  const handleVKIDLogin = () => {
-    try {
-      console.log('Redirecting to VK auth:', VK_AUTH_URL); // Отладка
-      window.location.href = VK_AUTH_URL;
-    } catch (error) {
-      console.error('Ошибка перенаправления на VK:', error);
-      setError('Ошибка перенаправления на VK');
-    }
-  };
-
-  const handleAppleLogin = () => {
-    setError('Авторизация через Apple пока не поддерживается');
-  };
 
   const handleSwitchToRegister = () => {
     onLoginClose();
@@ -299,7 +292,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
               </span>
             </p>
             <div className="flex-row">
-              <button className="btn google" type="button" onClick={() => googleLogin()}>
+              <button className="button-submit google" type="button" onClick={() => googleLogin()}>
                 <svg version="1.1" width="20" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style={{ enableBackground: 'new 0 0 512 512' }} xmlSpace="preserve">
                   <path style={{ fill: '#FBBB00' }} d="M113.47,309.408L95.648,375.94l-65.139,1.378C11.042,341.211,0,299.9,0,256 c0-42.451,10.324-82.483,28.624-117.732h0.014l57.992,10.632l25.404,57.644c-5.317,15.501-8.215,32.141-8.215,49.456 C103.821,274.792,107.225,292.797,113.47,309.408z"></path>
                   <path style={{ fill: '#518EF8' }} d="M507.527,208.176C510.467,223.662,512,239.655,512,256c0,18.328-1.927,36.206-5.598,53.451 c-12.462,58.683-45.025,109.925-90.134,146.187l-0.014-0.014l-73.044-3.727l-10.338-64.535 c29.932-17.554,53.324-45.025,65.646-77.911h-136.89V208.176h138.887L507.527,208.176L507.527,208.176z"></path>
@@ -307,10 +300,6 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
                   <path style={{ fill: '#F14336' }} d="M419.404,58.936l-82.933,67.896c-23.335-14.586-50.919-23.012-80.471-23.012 c-66.729,0-123.429,42.957-143.965,102.724l-83.397-68.276h-0.014C71.23,56.123,157.06,0,256,0 C318.115,0,375.068,22.126,419.404,58.936z"></path>
                 </svg>
                 Google
-              </button>
-              <button className="btn vkid" type="button" onClick={handleVKIDLogin}>
-                <img src={vkidIcon} alt="VKID" style={{ width: '24px', height: '24px' }} />
-                VKID
               </button>
             </div>
           </form>
