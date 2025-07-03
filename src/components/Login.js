@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import * as VKID from '@vkid/sdk';
@@ -23,6 +23,7 @@ const Login = ({
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const vkidContainerRef = useRef(null);
 
   useEffect(() => {
     console.log('Login.js: VKID SDK imported:', VKID);
@@ -39,44 +40,49 @@ const Login = ({
       setError('Ошибка инициализации VKID');
     }
 
-    const oneTap = new VKID.OneTap();
-    oneTap
-      .render({
-        container: document.getElementById('vkid-button-container'),
-        scheme: 'light',
-        lang: 'rus',
-        showAlternativeLogin: true,
-      })
-      .on(VKID.WidgetEvents.ERROR, (error) => {
-        console.error('Login.js: Ошибка VKID:', error);
-        setError('Ошибка при авторизации через VKID');
-      })
-      .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
-        const { code, device_id } = payload;
-        try {
-          const response = await VKID.Auth.exchangeCode(code, device_id);
-          console.log('Login.js: Успешный обмен кода:', response);
-          const { access_token, user_id, email } = response;
+    if (vkidContainerRef.current) {
+      const oneTap = new VKID.OneTap();
+      oneTap
+        .render({
+          container: vkidContainerRef.current,
+          scheme: 'light',
+          lang: 'rus',
+          showAlternativeLogin: true,
+        })
+        .on(VKID.WidgetEvents.ERROR, (error) => {
+          console.error('Login.js: Ошибка VKID:', error);
+          setError('Ошибка при авторизации через VKID');
+        })
+        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
+          const { code, device_id } = payload;
+          try {
+            const response = await VKID.Auth.exchangeCode(code, device_id);
+            console.log('Login.js: Успешный обмен кода:', response);
+            const { access_token, user_id, email } = response;
 
-          // Отправка access_token на сервер для проверки и сохранения
-          const serverResponse = await fetch(`${BACKEND_URL}/auth/vkid/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ access_token, user_id, email }),
-            credentials: 'include',
-          });
+            // Отправка access_token на сервер для проверки и сохранения
+            const serverResponse = await fetch(`${BACKEND_URL}/auth/vkid/token`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ access_token, user_id, email }),
+              credentials: 'include',
+            });
 
-          if (!serverResponse.ok) throw new Error(`Ошибка сервера: ${serverResponse.status}`);
-          const userInfo = await serverResponse.json();
-          onLoginSuccess(userInfo);
-          localStorage.setItem('vk_access_token', access_token);
-          localStorage.setItem('userInfo', JSON.stringify(userInfo));
-          onLoginClose();
-        } catch (error) {
-          console.error('Login.js: Ошибка обмена кода или обработки:', error);
-          setError('Ошибка авторизации через VKID');
-        }
-      });
+            if (!serverResponse.ok) throw new Error(`Ошибка сервера: ${serverResponse.status}`);
+            const userInfo = await serverResponse.json();
+            onLoginSuccess(userInfo);
+            localStorage.setItem('vk_access_token', access_token);
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            onLoginClose();
+          } catch (error) {
+            console.error('Login.js: Ошибка обмена кода или обработки:', error);
+            setError('Ошибка авторизации через VKID');
+          }
+        });
+    } else {
+      console.error('Login.js: Контейнер для VKID не найден');
+      setError('Ошибка: Контейнер для VKID не инициализирован');
+    }
   }, [onLoginSuccess, onLoginClose, BACKEND_URL]);
 
   useEffect(() => {
@@ -199,10 +205,10 @@ const Login = ({
   });
 
   const handleVKIDLogin = () => {
-    try {
+    if (vkidContainerRef.current) {
       const oneTap = new VKID.OneTap();
       oneTap.render({
-        container: document.getElementById('vkid-button-container'),
+        container: vkidContainerRef.current,
         scheme: 'light',
         lang: 'rus',
         showAlternativeLogin: true,
@@ -212,9 +218,9 @@ const Login = ({
           setError('Ошибка при авторизации через VKID');
         });
       console.log('Login.js: Кнопка VKID отрендерена');
-    } catch (error) {
-      console.error('Login.js: Ошибка создания OneTap:', error);
-      setError('Ошибка инициализации кнопки VKID');
+    } else {
+      console.error('Login.js: Контейнер для VKID не найден при ручном вызове');
+      setError('Ошибка: Контейнер для VKID не инициализирован');
     }
   };
 
@@ -300,7 +306,7 @@ const Login = ({
                 VKID
               </button>
             </div>
-            <div id="vkid-button-container"></div>
+            <div ref={vkidContainerRef} id="vkid-button-container"></div>
           </form>
         </div>
       )}
