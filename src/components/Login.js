@@ -3,8 +3,8 @@ import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import axios from 'axios';
 import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт вашего SVG-файла для VKID
 // Инициализация VKID SDK
-const APP_NAME = "MyApp";
-const CLIENT_ID = "53837908";
+const APP_NAME = "VKAPITEST";
+const CLIENT_ID = "53544787";
 const REDIRECT_URI = "https://react-lime-delta.vercel.app";
 
 const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
