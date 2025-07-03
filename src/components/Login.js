@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт вашего SVG-файла для VKID
-// Инициализация VKID SDK
+import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт SVG для VKID
+
+// Константы
 const APP_NAME = "VKAPITEST";
 const CLIENT_ID = "53544787";
 const REDIRECT_URI = "https://react-lime-delta.vercel.app";
+const BACKEND_URL = "https://reactz-eedv.vercel.app"; // Убедитесь, что это правильный URL вашего бэкенда
 
 const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
   const [email, setEmail] = useState('');
@@ -19,8 +21,13 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
     script.src = "https://id.vk.com/js/vkid-sdk/vkid-sdk.min.js";
     script.async = true;
     script.onload = () => {
-      window.VKIDSDK.init({ clientId: CLIENT_ID, redirectUri: REDIRECT_URI });
+      if (window.VKIDSDK) {
+        window.VKIDSDK.init({ clientId: CLIENT_ID, redirectUri: REDIRECT_URI });
+      } else {
+        setError('Не удалось загрузить VKID SDK');
+      }
     };
+    script.onerror = () => setError('Ошибка загрузки VKID SDK');
     document.body.appendChild(script);
     return () => {
       document.body.removeChild(script);
@@ -35,14 +42,18 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
 
     if (storedUser && (googleToken || vkToken)) {
       onLoginSuccess(storedUser);
-    } else if (googleToken) {
-      fetch('https://reactz-eedv.vercel.app/auth/google', {
+      return;
+    }
+
+    if (googleToken) {
+      fetch(`${BACKEND_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: googleToken }),
+        credentials: 'include', // Для отправки куки, если используются
       })
         .then((res) => {
-          if (!res.ok) throw new Error('Invalid token response');
+          if (!res.ok) throw new Error(`Ошибка Google: ${res.status}`);
           return res.json();
         })
         .then((userInfo) => {
@@ -55,12 +66,16 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
             onLogout();
           }
         })
-        .catch(() => {
-          console.error('Ошибка проверки Google токена');
+        .catch((err) => {
+          console.error('Ошибка проверки Google токена:', err.message);
+          setError('Ошибка проверки Google токена');
         });
     } else if (vkToken) {
       fetch(`https://api.vk.com/method/users.get?access_token=${vkToken}&v=5.131&fields=first_name,last_name,photo_100`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
+          return res.json();
+        })
         .then((data) => {
           if (data.response && data.response.length > 0) {
             const vkUser = data.response[0];
@@ -76,8 +91,9 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
             onLogout();
           }
         })
-        .catch(() => {
-          console.error('Ошибка проверки VKID токена');
+        .catch((err) => {
+          console.error('Ошибка проверки VKID токена:', err.message);
+          setError('Ошибка проверки VKID токена');
         });
     }
   }, [onLoginSuccess, onLogout]);
@@ -89,9 +105,9 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       return;
     }
     try {
-      const response = await axios.post('https://reactz-eedv.vercel.app/login', { email, password });
+      const response = await axios.post(`${BACKEND_URL}/login`, { email, password }, { withCredentials: true });
       localStorage.setItem('token', response.data.token);
-      const userInfo = { email, name: email };
+      const userInfo = { email, name: response.data.name || email };
       onLoginSuccess(userInfo);
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       setError('');
@@ -99,6 +115,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       setPassword('');
       onLoginClose();
     } catch (error) {
+      console.error('Ошибка входа:', error.message);
       setError(error.response?.data?.error || 'Ошибка входа');
     }
   };
@@ -110,7 +127,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       return;
     }
     try {
-      const response = await axios.post('https://reactz-eedv.vercel.app/register', { email, password, name });
+      const response = await axios.post(`${BACKEND_URL}/register`, { email, password, name }, { withCredentials: true });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name };
       onRegisterSuccess(userInfo);
@@ -121,6 +138,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       setName('');
       onRegisterClose();
     } catch (error) {
+      console.error('Ошибка регистрации:', error.message);
       setError(error.response?.data?.error || 'Ошибка регистрации');
     }
   };
@@ -128,12 +146,13 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const res = await fetch('https://reactz-eedv.vercel.app/auth/google', {
+        const res = await fetch(`${BACKEND_URL}/auth/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ access_token: tokenResponse.access_token }),
+          credentials: 'include',
         });
-        if (!res.ok) throw new Error('Failed to fetch user info');
+        if (!res.ok) throw new Error(`Ошибка Google: ${res.status}`);
         const userInfo = await res.json();
         if (userInfo.email) {
           onLoginSuccess(userInfo);
@@ -142,14 +161,16 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
           onLoginClose();
         }
       } catch (error) {
+        console.error('Ошибка входа через Google:', error.message);
         setError('Ошибка входа через Google');
       }
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Ошибка авторизации через Google:', error);
       setError('Ошибка авторизации через Google');
     },
     scope: 'email profile',
-    redirect_uri: 'https://react-lime-delta.vercel.app',
+    redirect_uri: REDIRECT_URI,
   });
 
   const handleVKIDLogin = () => {
@@ -163,7 +184,8 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
         showAlternativeLogin: true,
       });
       oneTapButton.render()
-        .on(window.VKIDSDK.WidgetEvents.ERROR, () => {
+        .on(window.VKIDSDK.WidgetEvents.ERROR, (error) => {
+          console.error('Ошибка VKID:', error);
           setError('Ошибка при авторизации через VKID');
         })
         .on(window.VKIDSDK.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
@@ -173,7 +195,10 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
               const { access_token } = response;
               localStorage.setItem('vk_access_token', access_token);
               fetch(`https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131&fields=first_name,last_name,photo_100`)
-                .then((res) => res.json())
+                .then((res) => {
+                  if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
+                  return res.json();
+                })
                 .then((data) => {
                   if (data.response && data.response.length > 0) {
                     const vkUser = data.response[0];
@@ -186,11 +211,13 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
                     onLoginClose();
                   }
                 })
-                .catch(() => {
+                .catch((error) => {
+                  console.error('Ошибка получения данных VK:', error.message);
                   setError('Ошибка получения данных пользователя');
                 });
             })
-            .catch(() => {
+            .catch((error) => {
+              console.error('Ошибка обмена кода VK:', error.message);
               setError('Ошибка обмена кода на токен');
             });
         });
@@ -237,7 +264,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
             <div className="inputForm">
               <svg height="20" viewBox="-64 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg">
                 <path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0"></path>
-                <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
+                <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
               </svg>
               <input
                 type="password"
@@ -276,10 +303,10 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
                 </svg>
                 Google
               </button>
-<button className="btn vkid" type="button" onClick={handleVKIDLogin}>
-  <img src={vkidIcon} alt="VKID" style={{ width: '24px', height: '24px' }} />
-  VKID
-</button>
+              <button className="btn vkid" type="button" onClick={handleVKIDLogin}>
+                <img src={vkidIcon} alt="VKID" style={{ width: '24px', height: '24px' }} />
+                VKID
+              </button>
             </div>
           </form>
         </div>
