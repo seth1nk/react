@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useLayoutEffect, useRef } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import * as VKID from '@vkid/sdk';
@@ -25,7 +25,7 @@ const Login = ({
   const [error, setError] = useState('');
   const vkidContainerRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (showLogin && vkidContainerRef.current) {
       console.log('Login.js: VKID SDK imported:', VKID);
       try {
@@ -56,7 +56,6 @@ const Login = ({
               console.log('Login.js: Успешный обмен кода:', response);
               const { access_token, user_id, email } = response;
 
-              // Отправка access_token на сервер
               const serverResponse = await fetch(`${BACKEND_URL}/auth/vkid/token`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
