@@ -52,12 +52,13 @@ const Login = ({
         localStorage.setItem('vk_code_verifier', codeVerifier);
 
         VKID.Config.init({
-          app: Number(CLIENT_ID), // Ensure app is a number
-          redirectUri: REDIRECT_URI,
+          app: Number(CLIENT_ID), // Убедитесь, что app - число
+          redirectUri: REDIRECT_URI, // Исправлено с redirectUrl на redirectUri
           state: 'state123',
           codeChallenge,
           codeChallengeMethod: 'S256',
           scope: 'email',
+          statsFlow: false, // Отключаем отправку статистики для обхода CORS
         });
         console.log('Login.js: VKID initialized successfully with PKCE');
       } catch (err) {
