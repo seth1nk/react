@@ -18,26 +18,33 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   // Загрузка VKID SDK
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js";
+    script.src = "https://unpkg.com/@vkid/sdk@2.5.2/dist-sdk/umd/index.js";
     script.async = true;
     script.onload = () => {
       console.log('VKID SDK script loaded');
-      if (window.VKID) {
-        console.log('VKID available, initializing...', window.VKID);
-        try {
-          window.VKID.Config.init({
-            app: CLIENT_ID,
-            redirectUrl: REDIRECT_URI,
-            state: 'state123', // Для безопасности, можно генерировать динамически
-          });
-        } catch (err) {
-          console.error('Ошибка инициализации VKID:', err);
-          setError('Ошибка инициализации VKID');
+      // Проверяем window.VKID с небольшой задержкой
+      const checkVKID = () => {
+        if (window.VKID) {
+          console.log('VKID available, initializing...', window.VKID);
+          try {
+            window.VKID.Config.init({
+              app: CLIENT_ID,
+              redirectUrl: REDIRECT_URI,
+              state: 'state123',
+              scope: 'email',
+            });
+            console.log('VKID initialized successfully');
+          } catch (err) {
+            console.error('Ошибка инициализации VKID:', err);
+            setError('Ошибка инициализации VKID');
+          }
+        } else {
+          console.error('VKID not found, window object:', Object.keys(window));
+          setError('Не удалось загрузить VKID SDK');
         }
-      } else {
-        console.error('VKID not found');
-        setError('Не удалось загрузить VKID SDK');
-      }
+      };
+      // Задержка для асинхронной загрузки
+      setTimeout(checkVKID, 100);
     };
     script.onerror = () => {
       console.error('Failed to load VKID SDK script');
@@ -65,7 +72,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: googleToken }),
-        credentials: 'include', // Для отправки куки
+        credentials: 'include',
       })
         .then((res) => {
           if (!res.ok) throw new Error(`Ошибка Google: ${res.status}`);
@@ -190,57 +197,62 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
 
   const handleVKIDLogin = () => {
     if (window.VKID) {
-      const oneTap = new window.VKID.OneTap();
-      oneTap.render({
-        container: document.getElementById('vkid-button-container'),
-        scheme: 'light',
-        lang: 'rus',
-        showAlternativeLogin: true,
-      })
-        .on('error', (error) => {
-          console.error('Ошибка VKID:', error);
-          setError('Ошибка при авторизации через VKID');
+      try {
+        const oneTap = new window.VKID.OneTap();
+        oneTap.render({
+          container: document.getElementById('vkid-button-container'),
+          scheme: 'light',
+          lang: 'rus',
+          showAlternativeLogin: true,
         })
-        .on('success', (payload) => {
-          const { code, device_id } = payload;
-          fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${device_id}`, {
-            method: 'GET',
-            credentials: 'include',
+          .on('error', (error) => {
+            console.error('Ошибка VKID:', error);
+            setError('Ошибка при авторизации через VKID');
           })
-            .then((res) => {
-              if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
-              return res.json();
+          .on('success', (payload) => {
+            const { code, device_id } = payload;
+            fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${device_id}`, {
+              method: 'GET',
+              credentials: 'include',
             })
-            .then((response) => {
-              const { access_token } = response;
-              localStorage.setItem('vk_access_token', access_token);
-              fetch(`https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131&fields=first_name,last_name,photo_100`)
-                .then((res) => {
-                  if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
-                  return res.json();
-                })
-                .then((data) => {
-                  if (data.response && data.response.length > 0) {
-                    const vkUser = data.response[0];
-                    const userInfo = {
-                      name: `${vkUser.first_name} ${vkUser.last_name}`,
-                      picture: vkUser.photo_100,
-                    };
-                    onLoginSuccess(userInfo);
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    onLoginClose();
-                  }
-                })
-                .catch((error) => {
-                  console.error('Ошибка получения данных VK:', error.message);
-                  setError('Ошибка получения данных пользователя');
-                });
-            })
-            .catch((error) => {
-              console.error('Ошибка обмена кода VK:', error.message);
-              setError('Ошибка обмена кода на токен');
-            });
-        });
+              .then((res) => {
+                if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
+                return res.json();
+              })
+              .then((response) => {
+                const { access_token } = response;
+                localStorage.setItem('vk_access_token', access_token);
+                fetch(`https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131&fields=first_name,last_name,photo_100`)
+                  .then((res) => {
+                    if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
+                    return res.json();
+                  })
+                  .then((data) => {
+                    if (data.response && data.response.length > 0) {
+                      const vkUser = data.response[0];
+                      const userInfo = {
+                        name: `${vkUser.first_name} ${vkUser.last_name}`,
+                        picture: vkUser.photo_100,
+                      };
+                      onLoginSuccess(userInfo);
+                      localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                      onLoginClose();
+                    }
+                  })
+                  .catch((error) => {
+                    console.error('Ошибка получения данных VK:', error.message);
+                    setError('Ошибка получения данных пользователя');
+                  });
+              })
+              .catch((error) => {
+                console.error('Ошибка обмена кода VK:', error.message);
+                setError('Ошибка обмена кода на токен');
+              });
+          });
+      } catch (error) {
+        console.error('Ошибка создания OneTap:', error);
+        setError('Ошибка инициализации кнопки VKID');
+      }
     } else {
       setError('VKID SDK не загружен');
     }
