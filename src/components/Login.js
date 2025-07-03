@@ -336,443 +336,60 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
               <svg height="20" viewBox="0 0 32 32" width="20" xmlns="http://www.w3.org/2000/svg">
                 <g id="Layer_3" data-name="Layer 3">
                   <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z"></path>
-               As a helpful AI, I aim to provide clear and accurate solutions. Below, I’ve updated the `Login.js` and `index.js` files to address the “VKID SDK not loaded” issue, incorporating the provided SDK URL (`https://unpkg.com/@vkid/sdk@2.6.0/dist-sdk/umd/index.js`), adding a container for the VKID button, and moving the code-to-token exchange to the backend. I’ve preserved all existing functionality and made only the necessary changes to fix the issue. Since you requested full code files, I’m providing the complete updated versions of `Login.js` and `index.js`. The `package.json` files for both frontend and backend remain unchanged, as no modifications are needed there.
+                </g>
+              </svg>
+              <input
+                type="text"
+                className="input"
+                placeholder="Введите ваше имя"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="flex-column">
+              <label>Email</label>
+            </div>
+            <div className="inputForm">
+              <svg height="20" viewBox="0 0 32 32" width="20" xmlns="http://www.w3.org/2000/svg">
+                <g id="Layer_3" data-name="Layer 3">
+                  <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z"></path>
+                </g>
+              </svg>
+              <input
+                type="email"
+                className="input"
+                placeholder="Введите ваш Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="flex-column">
+              <label>Пароль</label>
+            </div>
+            <div className="inputForm">
+              <svg height="20" viewBox="-64 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg">
+                <path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0"></path>
+                <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
+              </svg>
+              <input
+                type="password"
+                className="input"
+                placeholder="Введите ваш пароль"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <svg viewBox="0 0 576 512" height="1em" xmlns="http://www.w3.org/2000/svg">
+                <path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"></path>
+              </svg>
+            </div>
+            <button className="button-submit" type="submit">
+              Зарегистрироваться
+            </button>
+          </form>
+        </div>
+      )}
+    </>
+  );
+};
 
----
-
-<xaiArtifact artifact_id="36564f34-fe6f-4a12-8a8f-8b5d5ff59c6d" artifact_version_id="dc7855fb-22dd-442b-979d-9a9d0478d252" title="Login.js" contentType="text/javascript">
-import React, { useState, useEffect } from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
-import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт SVG для VKID
-
-// Constants
-const APP_NAME = "VKAPITEST";
-const CLIENT_ID = "53544787";
-const REDIRECT_URI = "https://react-lime-delta.vercel.app";
-const BACKEND_URL = "https://reactz-czkx.onrender.com"; // New backend URL
-
-const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
-
-  // Load VKID SDK
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/@vkid/sdk@2.6.0/dist-sdk/umd/index.js";
-    script.async = true;
-    script.onload = () => {
-      console.log('VKID SDK script loaded');
-      if (window.VKIDSDK) {
-        console.log('VKIDSDK available, initializing...');
-        window.VKIDSDK.init({ clientId: CLIENT_ID, redirectUri: REDIRECT_URI });
-      } else {
-        console.error('VKIDSDK not found');
-        setError('Не удалось загрузить VKID SDK');
-      }
-    };
-    script.onerror = () => {
-      console.error('Failed to load VKID SDK script');
-      setError('Ошибка загрузки VKID SDK');
-    };
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  // Check token on load
-  useEffect(() => {
-    const googleToken = localStorage.getItem('google_access_token');
-    const vkToken = localStorage.getItem('vk_access_token');
-    const storedUser = JSON.parse(localStorage.getItem('userInfo'));
-
-    if (storedUser && (googleToken || vkToken)) {
-      onLoginSuccess(storedUser);
-      return;
-    }
-
-    if (googleToken) {
-      fetch(`${BACKEND_URL}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ access_token: googleToken }),
-        credentials: 'include', // For sending cookies
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error(`Google error: ${res.status}`);
-          return res.json();
-        })
-        .then((userInfo) => {
-          if (userInfo.email) {
-            onLoginSuccess(userInfo);
-            localStorage.setItem('userInfo', JSON.stringify(userInfo));
-          } else {
-            localStorage.removeItem('google_access_token');
-            localStorage.removeItem('userInfo');
-            onLogout();
-          }
-        })
-        .catch((err) => {
-          console.error('Error verifying Google token:', err.message);
-          setError('Ошибка проверки Google токена');
-        });
-    } else if (vkToken) {
-      fetch(`https://api.vk.com/method/users.get?access_token=${vkToken}&v=5.131&fields=first_name,last_name,photo_100`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`VK error: ${res.status}`);
-          return res.json();
-        })
-        .then((data) => {
-          if (data.response && data.response.length > 0) {
-            const vkUser = data.response[0];
-            const userInfo = {
-              name: `${vkUser.first_name} ${vkUser.last_name}`,
-              picture: vkUser.photo_100,
-            };
-            onLoginSuccess(userInfo);
-            localStorage.setItem('userInfo', JSON.stringify(userInfo));
-          } else {
-            localStorage.removeItem('vk_access_token');
-            localStorage.removeItem('userInfo');
-            onLogout();
-          }
-        })
-        .catch((err) => {
-          console.error('Error verifying VKID token:', err.message);
-          setError('Ошибка проверки VKID токена');
-        });
-    }
-  }, [onLoginSuccess, onLogout]);
-
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setError('Заполните все поля');
-      return;
-    }
-    try {
-      const response = await axios.post(`${BACKEND_URL}/login`, { email, password }, { withCredentials: true });
-      localStorage.setItem('token', response.data.token);
-      const userInfo = { email, name: response.data.name || email };
-      onLoginSuccess(userInfo);
-      localStorage.setItem('userInfo', JSON.stringify(userInfo));
-      setError('');
-      setEmail('');
-      setPassword('');
-      onLoginClose();
-    } catch (error) {
-      console.error('Login error:', error.message);
-      setError(error.response?.data?.error || 'Ошибка входа');
-    }
-  };
-
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    if (!name || !email || !password) {
-      setError('Заполните все поля');
-      return;
-    }
-    try {
-      const response = await axios.post(`${BACKEND_URL}/register`, { email, password, name }, { withCredentials: true });
-      localStorage.setItem('token', response.data.token);
-      const userInfo = { email, name };
-      onRegisterSuccess(userInfo);
-      localStorage.setItem('userInfo', JSON.stringify(userInfo));
-      setError('');
-      setEmail('');
-      setPassword('');
-      setName('');
-      onRegisterClose();
-    } catch (error) {
-      console.error('Registration error:', error.message);
-      setError(error.response?.data?.error || 'Ошибка регистрации');
-    }
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const res = await fetch(`${BACKEND_URL}/auth/google`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ access_token: tokenResponse.access_token }),
-          credentials: 'include',
-        });
-        if (!res.ok) throw new Error(`Google error: ${res.status}`);
-        const userInfo = await res.json();
-        if (userInfo.email) {
-          onLoginSuccess(userInfo);
-          localStorage.setItem('google_access_token', tokenResponse.access_token);
-          localStorage.setItem('userInfo', JSON.stringify(userInfo));
-          onLoginClose();
-        }
-      } catch (error) {
-        console.error('Google login error:', error.message);
-        setError('Ошибка входа через Google');
-      }
-    },
-    onError: (error) => {
-      console.error('Google auth error:', error);
-      setError('Ошибка авторизации через Google');
-    },
-    scope: 'email profile',
-    redirect_uri: REDIRECT_URI,
-  });
-
-  const handleVKIDLogin = () => {
-    if (window.VKIDSDK) {
-      const oneTapButton = new window.VKIDSDK.OneTapButton({
-        clientId: CLIENT_ID,
-        redirectUri: REDIRECT_URI,
-        appName: APP_NAME,
-        scheme: window.VKIDSDK.Scheme.LIGHT,
-        lang: window.VKIDSDK.Languages.RUS,
-        showAlternativeLogin: true,
-      });
-      oneTapButton.render({ element: '#vkid-button-container' })
-        .on(window.VKIDSDK.WidgetEvents.ERROR, (error) => {
-          console.error('VKID error:', error);
-          setError('Ошибка при авторизации через VKID');
-        })
-        .on(window.VKIDSDK.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
-          const { code, device_id } = payload;
-          fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${device_id}`, {
-            method: 'GET',
-            credentials: 'include',
-          })
-            .then((res) => {
-              if (!res.ok) throw new Error(`VK error: ${res.status}`);
-              return res.json();
-            })
-            .then((response) => {
-              const { access_token } = response;
-              localStorage.setItem('vk_access_token', access_token);
-              fetch(`https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131&fields=first_name,last_name,photo_100`)
-                .then((res) => {
-                  if (!res.ok) throw new Error(`VK error: ${res.status}`);
-                  return res.json();
-                })
-                .then((data) => {
-                  if (data.response && data.response.length > 0) {
-                    const vkUser = data.response[0];
-                    const userInfo = {
-                      name: `${vkUser.first_name} ${vkUser.last_name}`,
-                      picture: vkUser.photo_100,
-                    };
-                    onLoginSuccess(userInfo);
-                    localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    onLoginClose();
-                  }
-                })
-                .catch((error) => {
-                  console.error('Error fetching VK data:', error.message);
-                  setError('Ошибка получения данных пользователя');
-                });
-            })
-            .catch((error) => {
-              console.error('Error exchanging VK code:', error.message);
-              setError('Ошибка обмена кода на токен');
-            });
-        });
-    } else {
-      setError('VKID SDK не загружен');
-    }
-  };
-
-  const handleAppleLogin = () => {
-    setError('Авторизация через Apple пока не поддерживается');
-  };
-
-  const handleSwitchToRegister = () => {
-    onLoginClose();
-    onRegisterShow();
-  };
-
-  return (
-    <>
-      {showLogin && (
-        <div className="modal-overlay" onClick={onLogin Великоб
-
-<xaiArtifact artifact_id="9d176e6d-f277-4218-8966-1eae58702fa4" artifact_version_id="dec47361-a1a9-4e3e-a876-6585d7a02333" title="index.js" contentType="text/javascript">
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
-
-const app = express();
-
-// Настройка CORS
-app.use(cors({
-  origin: ['https://react-lime-delta.vercel.app', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
-
-// Установка заголовков COOP и COEP
-app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  console.log(`Запрос: ${req.method} ${req.url} от ${req.headers.origin}`);
-  next();
-});
-
-// Обработка предварительных запросов OPTIONS
-app.options('*', cors());
-
-app.use(express.json());
-
-// Подключение к базе PostgreSQL
-const pool = new Pool({
-  user: 'urqarbpjuehu9fk5eal7',
-  host: 'bdongtjfve7uhskj8hbz-postgresql.services.clever-cloud.com',
-  database: 'bdongtjfve7uhskj8hbz',
-  password: '5l36CuO5sO7tjbN0EeA1uptsd5JPNA',
-  port: 50013,
-});
-
-// Инициализация таблицы users
-async function initializeTable() {
-  try {
-    const client = await pool.connect();
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        name VARCHAR(255) NOT NULL
-      )
-    `);
-    console.log('Таблица users создана или уже существует');
-    client.release();
-  } catch (error) {
-    console.error('Ошибка инициализации таблицы:', error.message);
-    process.exit(1);
-  }
-}
-
-initializeTable();
-
-// Эндпоинт для Google-авторизации
-app.post('/auth/google', async (req, res) => {
-  try {
-    const { access_token } = req.body;
-    if (!access_token) {
-      return res.status(400).json({ error: 'Токен не предоставлен' });
-    }
-    const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    });
-    const userInfo = response.data;
-    console.log('Google userInfo:', userInfo);
-    res.json(userInfo);
-  } catch (error) {
-    console.error('Ошибка проверки Google токена:', error.response ? error.response.data : error.message);
-    res.status(500).json({ error: 'Ошибка авторизации через Google' });
-  }
-});
-
-// Эндпоинт для VKID-авторизации
-app.get('/auth/vkid', async (req, res) => {
-  const CLIENT_ID = "53544787";
-  const CLIENT_SECRET = process.env.VKID_CLIENT_SECRET; // Храните client_secret в переменной окружения
-  try {
-    const { code, device_id } = req.query;
-    if (!code || !device_id) {
-      return res.status(400).json({ error: 'Код или device_id не предоставлены' });
-    }
-    const response = await axios.post('https://api.vk.com/method/auth.exchangeCode', {
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      code,
-      device_id,
-      v: '5.131',
-    });
-    const { access_token } = response.data;
-    res.json({ access_token });
-  } catch (error) {
-    console.error('Ошибка обмена кода VK:', error.message);
-    res.status(500).json({ error: 'Ошибка обмена кода' });
-  }
-});
-
-// Эндпоинт для регистрации
-app.post('/register', async (req, res) => {
-  try {
-    const { email, password, name } = req.body;
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Все поля обязательны' });
-    }
-    const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ error: 'Пользователь уже существует' });
-    }
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const result = await pool.query(
-      'INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING id, email, name',
-      [email, hashedPassword, name]
-    );
-    const token = Buffer.from(email).toString('base64');
-    const userInfo = result.rows[0];
-    console.log('Пользователь зарегистрирован:', userInfo);
-    res.json({ token, ...userInfo });
-  } catch (error) {
-    console.error('Ошибка регистрации:', error.message);
-    res.status(500).json({ error: 'Ошибка регистрации' });
-  }
-});
-
-// Эндпоинт для входа
-app.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Все поля обязательны' });
-    }
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      return res.status(400).json({ error: 'Неверный email или пароль' });
-    }
-    const user = result.rows[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: 'Неверный email или пароль' });
-    }
-    const token = Buffer.from(email).toString('base64');
-    const userInfo = { email: user.email, name: user.name };
-    console.log('Пользователь вошел:', userInfo);
-    res.json({ token, ...userInfo });
-  } catch (error) {
-    console.error('Ошибка входа:', error.message);
-    res.status(500).json({ error: 'Ошибка входа' });
-  }
-});
-
-// Обработка ошибок маршрутов
-app.use((err, req, res, next) => {
-  console.error('Ошибка сервера:', err.message, err.stack);
-  if (err.message.includes('path-to-regexp')) {
-    res.status(500).json({ error: 'Ошибка в маршруте. Проверьте конфигурацию путей.' });
-  } else {
-    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
-  }
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Сервер запущен на http://localhost:${PORT}`);
-  // Логирование всех маршрутов для отладки
-  app._router.stack.forEach((middleware) => {
-    if (middleware.route) {
-      console.log(`Маршрут: ${middleware.route.path} (${Object.keys(middleware.route.methods).join(', ')})`);
-    }
-  });
-});
+export default Login;
