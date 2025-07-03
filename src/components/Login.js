@@ -36,7 +36,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
     if (storedUser && (googleToken || vkToken)) {
       onLoginSuccess(storedUser);
     } else if (googleToken) {
-      fetch('https://react-lime-delta.vercel.app/auth/google', {
+      fetch('https://reactz-eedv.vercel.app/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: googleToken }),
@@ -89,7 +89,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       return;
     }
     try {
-      const response = await axios.post('https://react-lime-delta.vercel.app/login', { email, password });
+      const response = await axios.post('https://reactz-eedv.vercel.app/login', { email, password });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name: email };
       onLoginSuccess(userInfo);
@@ -110,7 +110,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       return;
     }
     try {
-      const response = await axios.post('https://react-lime-delta.vercel.app/register', { email, password, name });
+      const response = await axios.post('https://reactz-eedv.vercel.app/register', { email, password, name });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name };
       onRegisterSuccess(userInfo);
@@ -128,7 +128,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const res = await fetch('https://react-lime-delta.vercel.app/auth/google', {
+        const res = await fetch('https://reactz-eedv.vercel.app/auth/google', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ access_token: tokenResponse.access_token }),
