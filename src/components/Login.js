@@ -52,7 +52,7 @@ const Login = ({
         localStorage.setItem('vk_code_verifier', codeVerifier);
 
         VKID.Config.init({
-          app: CLIENT_ID,
+          app: Number(CLIENT_ID), // Ensure app is a number
           redirectUri: REDIRECT_URI,
           state: 'state123',
           codeChallenge,
@@ -62,7 +62,7 @@ const Login = ({
         console.log('Login.js: VKID initialized successfully with PKCE');
       } catch (err) {
         console.error('Login.js: Ошибка инициализации VKID:', err);
-        setError('Ошибка инициализации VKID');
+        setError('Ошибка инициализации VKID: ' + err.message);
       }
     };
     initializeVKID();
@@ -199,7 +199,10 @@ const Login = ({
       })
         .on(VKID.WidgetEvents.ERROR, (error) => {
           console.error('Login.js: Ошибка VKID:', error);
-          setError('Ошибка при авторизации через VKID');
+          setError(`Ошибка VKID: ${error.text || 'Неизвестная ошибка'}`);
+        })
+        .on(VKID.WidgetEvents.SUCCESS, (data) => {
+          console.log('Login.js: Успешная авторизация VKID:', data);
         });
       console.log('Login.js: Кнопка VKID отрендерена');
     } catch (error) {
