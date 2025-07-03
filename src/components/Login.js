@@ -7,7 +7,7 @@ import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт SVG для V
 const APP_NAME = "VKAPITEST";
 const CLIENT_ID = "53544787";
 const REDIRECT_URI = "https://react-lime-delta.vercel.app";
-const BACKEND_URL = "https://reactz-czkx.onrender.com"; // Новый URL бэкенда
+const BACKEND_URL = "https://reactz-czkx.onrender.com"; // URL бэкенда
 
 const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
   const [email, setEmail] = useState('');
@@ -18,15 +18,24 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   // Загрузка VKID SDK
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://unpkg.com/@vkid/sdk@2.6.0/dist-sdk/umd/index.js";
+    script.src = "https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js";
     script.async = true;
     script.onload = () => {
       console.log('VKID SDK script loaded');
-      if (window.VKIDSDK) {
-        console.log('VKIDSDK available, initializing...');
-        window.VKIDSDK.init({ clientId: CLIENT_ID, redirectUri: REDIRECT_URI });
+      if (window.VKID) {
+        console.log('VKID available, initializing...', window.VKID);
+        try {
+          window.VKID.Config.init({
+            app: CLIENT_ID,
+            redirectUrl: REDIRECT_URI,
+            state: 'state123', // Для безопасности, можно генерировать динамически
+          });
+        } catch (err) {
+          console.error('Ошибка инициализации VKID:', err);
+          setError('Ошибка инициализации VKID');
+        }
       } else {
-        console.error('VKIDSDK not found');
+        console.error('VKID not found');
         setError('Не удалось загрузить VKID SDK');
       }
     };
@@ -180,21 +189,19 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   });
 
   const handleVKIDLogin = () => {
-    if (window.VKIDSDK) {
-      const oneTapButton = new window.VKIDSDK.OneTapButton({
-        clientId: CLIENT_ID,
-        redirectUri: REDIRECT_URI,
-        appName: APP_NAME,
-        scheme: window.VKIDSDK.Scheme.LIGHT,
-        lang: window.VKIDSDK.Languages.RUS,
+    if (window.VKID) {
+      const oneTap = new window.VKID.OneTap();
+      oneTap.render({
+        container: document.getElementById('vkid-button-container'),
+        scheme: 'light',
+        lang: 'rus',
         showAlternativeLogin: true,
-      });
-      oneTapButton.render({ element: '#vkid-button-container' })
-        .on(window.VKIDSDK.WidgetEvents.ERROR, (error) => {
+      })
+        .on('error', (error) => {
           console.error('Ошибка VKID:', error);
           setError('Ошибка при авторизации через VKID');
         })
-        .on(window.VKIDSDK.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+        .on('success', (payload) => {
           const { code, device_id } = payload;
           fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${device_id}`, {
             method: 'GET',
