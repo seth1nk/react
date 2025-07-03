@@ -9,7 +9,7 @@ import { Footer } from './components/Footer';
 import Login from './components/Login';
 import Cookie from './components/Cookie';
 import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const clientId = '412362294398-o724r7kr1klecombojvtko7dmnnnocud.apps.googleusercontent.com';
 
@@ -23,41 +23,61 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
+  // Отладка начального состояния
+  useEffect(() => {
+    console.log('App.js: Initial state:', { isAuthenticated, user });
+  }, [isAuthenticated, user]);
+
   const handleLoginShow = () => {
     setShowLogin(true);
-    setShowRegister(false); // Закрываем окно регистрации
+    setShowRegister(false);
+    console.log('App.js: handleLoginShow called');
   };
 
   const handleRegisterShow = () => {
     setShowRegister(true);
-    setShowLogin(false); // Закрываем окно входа
+    setShowLogin(false);
+    console.log('App.js: handleRegisterShow called');
   };
 
-  const handleLoginClose = () => setShowLogin(false);
-  const handleRegisterClose = () => setShowRegister(false);
+  const handleLoginClose = () => {
+    setShowLogin(false);
+    console.log('App.js: handleLoginClose called');
+  };
+
+  const handleRegisterClose = () => {
+    setShowRegister(false);
+    console.log('App.js: handleRegisterClose called');
+  };
 
   const handleLoginSuccess = (userInfo) => {
+    console.log('App.js: handleLoginSuccess called with:', userInfo); // Отладка
     setIsAuthenticated(true);
     setUser(userInfo);
     localStorage.setItem('userInfo', JSON.stringify(userInfo));
     setShowLogin(false);
+    console.log('App.js: State updated:', { isAuthenticated: true, user: userInfo });
   };
 
   const handleRegisterSuccess = (userInfo) => {
+    console.log('App.js: handleRegisterSuccess called with:', userInfo); // Отладка
     setIsAuthenticated(true);
     setUser(userInfo);
     localStorage.setItem('userInfo', JSON.stringify(userInfo));
     setShowRegister(false);
+    console.log('App.js: State updated:', { isAuthenticated: true, user: userInfo });
   };
 
   const handleLogout = () => {
+    console.log('App.js: handleLogout called'); // Отладка
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('google_access_token');
     localStorage.removeItem('vk_access_token');
     localStorage.removeItem('userInfo');
-    googleLogout(); // Завершаем сессию Google
+    googleLogout();
+    console.log('App.js: State after logout:', { isAuthenticated: false, user: null });
   };
 
   return (
