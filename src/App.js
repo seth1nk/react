@@ -37,7 +37,8 @@ function App() {
 
     if (code && state === 'state123') {
       console.log('App.js: Обнаружен code из VKID:', code);
-      fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${crypto.randomUUID()}`, {
+      const codeVerifier = localStorage.getItem('vk_code_verifier');
+      fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${crypto.randomUUID()}&code_verifier=${codeVerifier}`, {
         method: 'GET',
         credentials: 'include',
       })
@@ -68,6 +69,7 @@ function App() {
             };
             handleLoginSuccess(userInfo);
             localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            localStorage.removeItem('vk_code_verifier');
             window.history.replaceState({}, document.title, window.location.pathname);
           } else {
             throw new Error('Данные пользователя не получены');
