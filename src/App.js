@@ -12,6 +12,7 @@ import { GoogleOAuthProvider, googleLogout } from '@react-oauth/google';
 import { useState, useEffect } from 'react';
 
 const clientId = '412362294398-o724r7kr1klecombojvtko7dmnnnocud.apps.googleusercontent.com';
+const BACKEND_URL = "https://reactz-czkx.onrender.com";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -27,6 +28,53 @@ function App() {
   useEffect(() => {
     console.log('App.js: Initial state:', { isAuthenticated, user });
   }, [isAuthenticated, user]);
+
+  // Обработка code из URL для VKID
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+
+    if (code && state === 'state123') {
+      console.log('App.js: Обнаружен code из VKID:', code);
+      fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${crypto.randomUUID()}`, {
+        method: 'GET',
+        credentials: 'include',
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
+          return res.json();
+        })
+        .then((response) => {
+          const { access_token } = response;
+          console.log('App.js: Получен access_token:', access_token);
+          localStorage.setItem('vk_access_token', access_token);
+          return fetch(`https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131&fields=first_name,last_name,photo_100`);
+        })
+        .then((res) => {
+          if (!res.ok) throw new Error(`Ошибка VK: ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          if (data.response && data.response.length > 0) {
+            const vkUser = data.response[0];
+            const userInfo = {
+              name: `${vkUser.first_name} ${vkUser.last_name}`,
+              picture: vkUser.photo_100,
+            };
+            console.log('App.js: Успешно получены данные VK:', userInfo);
+            handleLoginSuccess(userInfo);
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            throw new Error('Данные пользователя не получены');
+          }
+        })
+        .catch((error) => {
+          console.error('App.js: Ошибка обработки VKID:', error.message);
+        });
+    }
+  }, []);
 
   const handleLoginShow = () => {
     setShowLogin(true);
@@ -51,7 +99,7 @@ function App() {
   };
 
   const handleLoginSuccess = (userInfo) => {
-    console.log('App.js: handleLoginSuccess called with:', userInfo); // Отладка
+    console.log('App.js: handleLoginSuccess called with:', userInfo);
     setIsAuthenticated(true);
     setUser(userInfo);
     localStorage.setItem('userInfo', JSON.stringify(userInfo));
@@ -60,7 +108,7 @@ function App() {
   };
 
   const handleRegisterSuccess = (userInfo) => {
-    console.log('App.js: handleRegisterSuccess called with:', userInfo); // Отладка
+    console.log('App.js: handleRegisterSuccess called with:', userInfo);
     setIsAuthenticated(true);
     setUser(userInfo);
     localStorage.setItem('userInfo', JSON.stringify(userInfo));
@@ -69,7 +117,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    console.log('App.js: handleLogout called'); // Отладка
+    console.log('App.js: handleLogout called');
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('token');
