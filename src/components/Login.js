@@ -7,7 +7,7 @@ import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт SVG для V
 const APP_NAME = "VKAPITEST";
 const CLIENT_ID = "53544787";
 const REDIRECT_URI = "https://react-lime-delta.vercel.app";
-const BACKEND_URL = "https://reactz-eedv.vercel.app"; // Убедитесь, что это правильный URL вашего бэкенда
+const BACKEND_URL = "https://reactz-czkx.onrender.com"; // Новый URL бэкенда
 
 const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
   const [email, setEmail] = useState('');
@@ -50,7 +50,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: googleToken }),
-        credentials: 'include', // Для отправки куки, если используются
+        credentials: 'include', // Для отправки куки
       })
         .then((res) => {
           if (!res.ok) throw new Error(`Ошибка Google: ${res.status}`);
@@ -264,7 +264,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
             <div className="inputForm">
               <svg height="20" viewBox="-64 0 512 512" width="20" xmlns="http://www.w3.org/2000/svg">
                 <path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0"></path>
-                <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
+                <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
               </svg>
               <input
                 type="password"
