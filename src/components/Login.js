@@ -5,7 +5,7 @@ import vkidIcon from '../assets/img/nav-icon1.svg'; // Импорт вашего
 // Инициализация VKID SDK
 const APP_NAME = "MyApp";
 const CLIENT_ID = "53837908";
-const REDIRECT_URI = "http://localhost:3000";
+const REDIRECT_URI = "https://react-lime-delta.vercel.app";
 
 const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLoginSuccess, onRegisterSuccess, onLogout, onRegisterShow }) => {
   const [email, setEmail] = useState('');
@@ -36,7 +36,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
     if (storedUser && (googleToken || vkToken)) {
       onLoginSuccess(storedUser);
     } else if (googleToken) {
-      fetch('http://localhost:5000/auth/google', {
+      fetch('https://react-lime-delta.vercel.app/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: googleToken }),
@@ -89,7 +89,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       return;
     }
     try {
-      const response = await axios.post('http://localhost:5000/login', { email, password });
+      const response = await axios.post('https://react-lime-delta.vercel.app/login', { email, password });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name: email };
       onLoginSuccess(userInfo);
@@ -110,7 +110,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       return;
     }
     try {
-      const response = await axios.post('http://localhost:5000/register', { email, password, name });
+      const response = await axios.post('https://react-lime-delta.vercel.app/register', { email, password, name });
       localStorage.setItem('token', response.data.token);
       const userInfo = { email, name };
       onRegisterSuccess(userInfo);
@@ -128,7 +128,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const res = await fetch('http://localhost:5000/auth/google', {
+        const res = await fetch('https://react-lime-delta.vercel.app/auth/google', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ access_token: tokenResponse.access_token }),
@@ -149,7 +149,7 @@ const Login = ({ showLogin, showRegister, onLoginClose, onRegisterClose, onLogin
       setError('Ошибка авторизации через Google');
     },
     scope: 'email profile',
-    redirect_uri: 'http://localhost:3000',
+    redirect_uri: 'https://react-lime-delta.vercel.app',
   });
 
   const handleVKIDLogin = () => {
