@@ -24,12 +24,10 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
-  // Отладка начального состояния
   useEffect(() => {
     console.log('App.js: Initial state:', { isAuthenticated, user });
   }, [isAuthenticated, user]);
 
-  // Обработка VKID code из URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
@@ -37,8 +35,7 @@ function App() {
 
     if (code && state === 'state123') {
       console.log('App.js: Обнаружен code из VKID:', code);
-      const codeVerifier = localStorage.getItem('vk_code_verifier');
-      fetch(`${BACKEND_URL}/auth/vkid?code=${code}&device_id=${crypto.randomUUID()}&code_verifier=${codeVerifier}`, {
+      fetch(`${BACKEND_URL}/auth/vkid?code=${code}&state=${state}`, {
         method: 'GET',
         credentials: 'include',
       })
@@ -52,7 +49,7 @@ function App() {
           if (!access_token) throw new Error('access_token не получен');
           localStorage.setItem('vk_access_token', access_token);
           return fetch(
-            `https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131&fields=first_name,last_name,photo_100`
+            `https://api.vk.com/method/users.get?access_token=${access_token}&v=5.199&fields=first_name,last_name,photo_100`
           );
         })
         .then((res) => {
@@ -69,7 +66,6 @@ function App() {
             };
             handleLoginSuccess(userInfo);
             localStorage.setItem('userInfo', JSON.stringify(userInfo));
-            localStorage.removeItem('vk_code_verifier');
             window.history.replaceState({}, document.title, window.location.pathname);
           } else {
             throw new Error('Данные пользователя не получены');
