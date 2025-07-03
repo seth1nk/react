@@ -38,7 +38,46 @@ const Login = ({
       console.error('Login.js: Ошибка инициализации VKID:', err);
       setError('Ошибка инициализации VKID');
     }
-  }, []);
+
+    const oneTap = new VKID.OneTap();
+    oneTap
+      .render({
+        container: document.getElementById('vkid-button-container'),
+        scheme: 'light',
+        lang: 'rus',
+        showAlternativeLogin: true,
+      })
+      .on(VKID.WidgetEvents.ERROR, (error) => {
+        console.error('Login.js: Ошибка VKID:', error);
+        setError('Ошибка при авторизации через VKID');
+      })
+      .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
+        const { code, device_id } = payload;
+        try {
+          const response = await VKID.Auth.exchangeCode(code, device_id);
+          console.log('Login.js: Успешный обмен кода:', response);
+          const { access_token, user_id, email } = response;
+
+          // Отправка access_token на сервер для проверки и сохранения
+          const serverResponse = await fetch(`${BACKEND_URL}/auth/vkid/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ access_token, user_id, email }),
+            credentials: 'include',
+          });
+
+          if (!serverResponse.ok) throw new Error(`Ошибка сервера: ${serverResponse.status}`);
+          const userInfo = await serverResponse.json();
+          onLoginSuccess(userInfo);
+          localStorage.setItem('vk_access_token', access_token);
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+          onLoginClose();
+        } catch (error) {
+          console.error('Login.js: Ошибка обмена кода или обработки:', error);
+          setError('Ошибка авторизации через VKID');
+        }
+      });
+  }, [onLoginSuccess, onLoginClose, BACKEND_URL]);
 
   useEffect(() => {
     const googleToken = localStorage.getItem('google_access_token');
