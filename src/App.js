@@ -37,8 +37,10 @@ function App() {
       // Очистка URL сразу, чтобы избежать повторных запросов
       window.history.replaceState({}, document.title, window.location.pathname);
       console.log('App.js: Обнаружен code из VKID:', code);
-      fetch(`${BACKEND_URL}/auth/vkid?code=${code}&state=${state}`, {
-        method: 'GET',
+      fetch(`${BACKEND_URL}/auth/vkid/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, state }),
         credentials: 'include',
       })
         .then((res) => {
@@ -46,7 +48,7 @@ function App() {
           return res.json();
         })
         .then((response) => {
-          console.log('App.js: Ответ от /auth/vkid:', response);
+          console.log('App.js: Ответ от /auth/vkid/token:', response);
           if (response.error) {
             throw new Error(`Ошибка VK API: ${response.error} - ${response.details}`);
           }
