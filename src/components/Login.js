@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import * as VKID from '@vkid/sdk';
@@ -25,7 +25,9 @@ const Login = ({
   const [error, setError] = useState('');
   const vkidContainerRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    console.log('Login.js: showLogin:', showLogin);
+    console.log('Login.js: vkidContainerRef.current:', vkidContainerRef.current);
     if (showLogin && vkidContainerRef.current) {
       console.log('Login.js: VKID SDK imported:', VKID);
       try {
@@ -78,11 +80,11 @@ const Login = ({
         console.error('Login.js: Ошибка инициализации VKID:', err);
         setError('Ошибка инициализации VKID');
       }
-    } else if (!vkidContainerRef.current) {
+    } else if (showLogin && !vkidContainerRef.current) {
       console.error('Login.js: Контейнер для VKID не найден');
       setError('Ошибка: Контейнер для VKID не инициализирован');
     }
-  }, [showLogin, onLoginSuccess, onLoginClose, BACKEND_URL]);
+  }, [showLogin, onLoginSuccess, onLoginClose]);
 
   useEffect(() => {
     const googleToken = localStorage.getItem('google_access_token');
